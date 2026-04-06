@@ -1,99 +1,151 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Bình chọn VXS - Bee Logistics</title>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VXS - Bee Logistics Voting</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root { --bee-blue: #004a99; --bee-yellow: #ffcb05; }
-        body { background-color: #f4f7f9; font-family: sans-serif; }
-        .btn-bee { background-color: var(--bee-blue); color: white; transition: 0.3s; }
-        .btn-bee:hover { background-color: #003366; }
-    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-[#ffcb05]">
-        <div class="p-6">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-[#004a99]">BÌNH CHỌN VXS</h1>
-                <p class="text-gray-500 text-sm">Vận hành - Điều phối - Logistics</p>
+<body class="bg-slate-50 p-4 md:p-8 font-sans">
+    <div id="app" class="max-w-xl mx-auto bg-white rounded-[2rem] shadow-2xl border-t-[12px] border-[#ffcb05] overflow-hidden">
+        
+        <div class="p-8 text-center bg-slate-900 text-white">
+            <div class="flex justify-center mb-3">
+                <i data-lucide="trophy" class="w-10 h-10 text-[#ffcb05]"></i>
+            </div>
+            <h1 class="text-2xl font-black tracking-tighter uppercase">NVXS Quarterly 2026</h1>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-1">Bee Logistics - VXS System</p>
+        </div>
+
+        <div class="p-8">
+            <div id="step1" class="space-y-6">
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-center gap-3">
+                    <i data-lucide="shield-check" class="text-blue-600"></i>
+                    <p class="text-xs font-bold text-blue-800">Vui lòng xác thực Email Bee để tiếp tục</p>
+                </div>
+                <input type="email" id="emailInput" placeholder="Jihoon.vnhph@beelogistics.com" 
+                       class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-600 transition-all">
+                <button onclick="sendOTP()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg hover:bg-blue-700 active:scale-95 transition-all">
+                    Nhận mã xác thực
+                </button>
             </div>
 
-            <form id="votingForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Chọn Quý bình chọn</label>
-                    <select id="quy" class="w-full mt-1 p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#004a99]">
-                        <option value="Q1-2026">Quý 1 - 2026</option>
-                        <option value="Q2-2026">Quý 2 - 2026</option>
-                    </select>
+            <div id="step2" class="hidden animate-in fade-in zoom-in space-y-6">
+                <p class="text-center text-sm font-bold text-slate-600">Mã 6 số đã được gửi vào Email của cậu</p>
+                <input type="text" id="otpInput" placeholder="● ● ● ● ● ●" 
+                       class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.5em] outline-none">
+                <button onclick="verifyOTP()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg">
+                    Xác nhận đăng nhập
+                </button>
+            </div>
+
+            <div id="mainContent" class="hidden animate-in slide-in-from-bottom-4 space-y-6">
+                <div class="flex justify-between items-center bg-slate-100 p-3 rounded-xl">
+                    <div class="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
+                        <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        <span id="displayUser"></span>
+                    </div>
+                    <button onclick="location.reload()" class="text-[9px] font-black text-red-500 uppercase underline">Thoát</button>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Người được đề cử</label>
-                    <select id="nguoiDuocDeCu" class="w-full mt-1 p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#004a99]">
-                        <option value="">-- Chọn đồng nghiệp --</option>
-                    </select>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kỳ bình chọn</label>
+                            <select id="quy" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm"><option value="Q1-2026">Quý 1 - 2026</option></select>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Đồng nghiệp</label>
+                            <select id="listNV" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm"></select>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Lý do/Thành tích tiêu biểu</label>
+                        <textarea id="lyDo" rows="4" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-medium text-sm outline-none focus:border-blue-600" placeholder="Gọn, rõ ý, đúng điểm mạnh..."></textarea>
+                    </div>
+                    <button onclick="saveVote()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-4 h-4"></i> Gửi đề cử chính thức
+                    </button>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Lý do đề cử (Súc tích)</label>
-                    <textarea id="lyDo" rows="3" class="w-full mt-1 p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#004a99]" placeholder="Điểm mạnh nổi bật trong quý..."></textarea>
+                <div id="adminArea" class="hidden mt-10 pt-8 border-t-2 border-dashed border-slate-200">
+                    <div class="flex items-center gap-2 mb-4 justify-center text-red-600">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <h3 class="font-black uppercase tracking-tighter">Bảng Tổng Hợp Dữ Liệu</h3>
+                    </div>
+                    <div id="resultTable" class="text-[10px] overflow-x-auto rounded-xl border border-slate-100 shadow-inner p-2 bg-slate-50"></div>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700">Email của cậu (Để xác thực)</label>
-                    <input type="email" id="emailNguoiGui" class="w-full mt-1 p-2 border rounded-md outline-none focus:ring-2 focus:ring-[#004a99]" placeholder="example@beelogistics.com">
-                </div>
-
-                <button type="submit" class="w-full btn-bee py-3 rounded-lg font-bold shadow-md">GỬI ĐỀ CỬ</button>
-            </form>
-            <p id="msg" class="mt-4 text-center text-sm font-medium"></p>
+            </div>
+            
+            <p id="status" class="mt-6 text-center text-[10px] font-black uppercase text-slate-400"></p>
         </div>
     </div>
 
     <script>
-        // Cấu hình kết nối (Sẽ lấy từ file .env sau khi lên Vercel)
+        // GIỮ NGUYÊN CẤU HÌNH SUPABASE CỦA CẬU
         const supabaseUrl = 'https://avfncwgydjhvnlqhixxd.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Thay bằng Anon Key của cậu
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2Zm5jd2d5ZGpodm5scWhpbHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MjExNjMsImV4cCI6MjA5MDk5NzE2M30.IW9_hPOwi4jZIgpL4HcTqa3KabO7LImotOZGDI-TsBw';
+        const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Load danh sách nhân viên vào dropdown
-        async function loadNhanVien() {
-            const { data } = await supabase.from('danh_sach_nhan_vien').select('ho_ten');
-            const select = document.getElementById('nguoiDuocDeCu');
-            data.forEach(nv => {
-                let opt = document.createElement('option');
-                opt.value = nv.ho_ten;
-                opt.innerHTML = nv.ho_ten;
-                select.appendChild(opt);
-            });
+        // Khởi tạo icon
+        lucide.createIcons();
+
+        async function sendOTP() {
+            const email = document.getElementById('emailInput').value;
+            if(!email.includes('@')) return alert("Nhập mail công ty cậu ơi!");
+            const { error } = await client.auth.signInWithOtp({ email });
+            if(error) alert(error.message);
+            else {
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('status').innerText = "OTP đã gửi tới: " + email;
+            }
         }
-        loadNhanVien();
 
-        // Xử lý gửi form
-        document.getElementById('votingForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('msg');
-            msg.innerText = "Đang gửi...";
+        async function verifyOTP() {
+            const email = document.getElementById('emailInput').value;
+            const token = document.getElementById('otpInput').value;
+            const { data, error } = await client.auth.verifyOtp({ email, token, type: 'magiclink' });
+            if(error) alert("Mã sai rồi cậu ơi!");
+            else loginSuccess(data.user.email);
+        }
 
-            const { error } = await supabase.from('danh_sach_de_cu').insert([{
-                nguoi_de_cu_email: document.getElementById('emailNguoiGui').value,
-                nguoi_duoc_de_cu: document.getElementById('nguoiDuocDeCu').value,
+        function loginSuccess(email) {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('displayUser').innerText = email;
+            if(email === 'Jihoon.vnhph@beelogistics.com') {
+                document.getElementById('adminArea').classList.remove('hidden');
+                loadAdminData();
+            }
+            loadNV();
+            lucide.createIcons();
+        }
+
+        async function loadNV() {
+            const { data } = await client.from('danh_sach_nhan_vien').select('ho_ten');
+            document.getElementById('listNV').innerHTML = data.map(n => `<option value="${n.ho_ten}">${n.ho_ten}</option>`).join('');
+        }
+
+        async function saveVote() {
+            const { error } = await client.from('danh_sach_de_cu').insert([{
+                nguoi_de_cu_email: document.getElementById('displayUser').innerText,
+                nguoi_duoc_de_cu: document.getElementById('listNV').value,
                 ly_do: document.getElementById('lyDo').value,
                 quy: document.getElementById('quy').value
             }]);
+            if(!error) { alert("Đã gửi đề cử thành công!"); location.reload(); }
+        }
 
-            if (error) {
-                msg.className = "text-red-500 text-center mt-4";
-                msg.innerText = "Lỗi: " + error.message;
-            } else {
-                msg.className = "text-green-600 text-center mt-4";
-                msg.innerText = "Gửi đề cử thành công! Cảm ơn Việt Anh.";
-                document.getElementById('votingForm').reset();
-            }
-        };
+        async function loadAdminData() {
+            const { data } = await client.from('danh_sach_de_cu').select('*');
+            let h = '<table class="w-full text-left"><thead><tr class="border-b"> <th class="p-2">Người nhận</th><th class="p-2">Lý do</th> </tr></thead><tbody>';
+            data.forEach(d => {
+                h += `<tr class="border-b"><td class="p-2 font-bold">${d.nguoi_duoc_de_cu}</td><td class="p-2">${d.ly_do}</td></tr>`;
+            });
+            document.getElementById('resultTable').innerHTML = h + '</tbody></table>';
+        }
     </script>
 </body>
 </html>
