@@ -2,190 +2,298 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VXS - Bee Logistics Voting</title>
+    <title>NVXS Quarterly - Bee Logistics</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
+        .tab-active { background: white; color: #2563eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); font-weight: 900; }
     </style>
 </head>
-<body class="bg-slate-100 p-4 md:p-8">
-    <div id="app" class="max-w-md mx-auto bg-white rounded-[2.5rem] shadow-2xl border-t-[12px] border-[#ffcb05] overflow-hidden">
-        
-        <div class="p-10 text-center bg-slate-900 text-white relative">
-            <div class="flex justify-center mb-4">
-                <div class="bg-[#ffcb05] p-3 rounded-2xl shadow-lg shadow-[#ffcb05]/20">
-                    <i data-lucide="trophy" class="w-8 h-8 text-slate-900"></i>
+<body class="bg-slate-50 min-h-screen pb-10 text-slate-900">
+    <div id="app">
+        <div id="loginPage" class="min-h-screen bg-slate-900 flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-900 via-slate-900 to-black">
+            <div class="w-full max-w-sm bg-white rounded-[40px] p-10 shadow-2xl text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="bg-blue-600 p-5 rounded-[24px] shadow-xl"><i data-lucide="lock" class="w-8 h-8 text-white"></i></div>
+                </div>
+                <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-8">Xác thực BEE</h2>
+                <div class="space-y-4">
+                    <select id="loginEmail" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 font-bold outline-none">
+                        <option value="">-- Chọn tên Anh/Chị --</option>
+                    </select>
+                    <input type="text" id="loginOtp" placeholder="MÃ OTP (BEE2026)" class="w-full p-4 rounded-2xl bg-slate-50 border-2 border-slate-100 font-black text-center text-xl tracking-[0.4em] uppercase outline-none">
+                    <select id="loginQuarter" class="w-full p-4 rounded-2xl bg-amber-50 border-2 border-amber-200 font-black text-amber-700 outline-none">
+                        <option value="Q1-2026">Q1 - 2026</option><option value="Q2-2026">Q2 - 2026</option>
+                    </select>
+                    <button onclick="handleLogin()" class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg">Vào hệ thống</button>
                 </div>
             </div>
-            <h1 class="text-2xl font-black tracking-tighter uppercase leading-tight">NVXS Quarterly<br>2026</h1>
-            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] mt-2">Bee Logistics - VXS System</p>
         </div>
 
-        <div class="p-8">
-            <div id="step1" class="space-y-6 animate-in fade-in duration-500">
-                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-center gap-3">
-                    <i data-lucide="shield-check" class="text-blue-600 w-5 h-5"></i>
-                    <p class="text-[11px] font-bold text-blue-800 uppercase tracking-tight">Xác thực Email Bee Logistics</p>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Email Công Ty</label>
-                    <input type="email" id="emailInput" placeholder="Jihoon.vnhph@beelogistics.com" 
-                           class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold outline-none focus:border-blue-600 transition-all text-sm">
-                </div>
-                <button onclick="sendOTP()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
-                    Gửi mã xác thực
-                </button>
-            </div>
-
-            <div id="step2" class="hidden animate-in zoom-in duration-300 space-y-6">
-                <div class="text-center">
-                    <p class="text-sm font-black text-slate-700 uppercase tracking-tight">Kiểm tra hộp thư</p>
-                    <p class="text-[10px] text-slate-400 font-medium mt-1">Mã 6 số đã được gửi vào mail của cậu</p>
-                </div>
-                <input type="text" id="otpInput" placeholder="0 0 0 0 0 0" 
-                       class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-3xl tracking-[0.4em] outline-none focus:border-emerald-500 transition-all">
-                <button onclick="verifyOTP()" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-xl shadow-emerald-100">
-                    Xác nhận & Đăng nhập
-                </button>
-                <button onclick="location.reload()" class="w-full text-[10px] font-bold text-slate-400 uppercase underline">Quay lại</button>
-            </div>
-
-            <div id="mainContent" class="hidden animate-in slide-in-from-bottom-8 duration-500 space-y-6">
-                <div class="flex justify-between items-center bg-slate-50 p-3 rounded-2xl border border-slate-100">
-                    <div class="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <span id="displayUser"></span>
-                    </div>
-                    <button onclick="location.reload()" class="text-[9px] font-black text-rose-500 uppercase bg-rose-50 px-3 py-1 rounded-full">Thoát</button>
-                </div>
-
-                <div class="bg-white space-y-5">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Kỳ bình chọn</label>
-                            <select id="quy" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-xs outline-none">
-                                <option value="Q1-2026">Quý 1 - 2026</option>
-                            </select>
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Đồng nghiệp</label>
-                            <select id="listNV" class="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl font-bold text-xs outline-none">
-                                <option value="">Chọn nhân sự...</option>
-                            </select>
+        <div id="mainPage" class="hidden">
+            <header class="bg-white border-b sticky top-0 z-40 shadow-sm">
+                <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="trophy" class="w-6 h-6 text-blue-600"></i>
+                        <div>
+                            <h1 class="font-black text-sm text-slate-800 uppercase tracking-tighter">NVXS Quarterly</h1>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span id="userName" class="text-[10px] text-blue-600 font-black uppercase"></span>
+                                <button onclick="location.reload()" class="text-[9px] text-rose-500 font-black uppercase">Thoát</button>
+                            </div>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[10px] font-black text-slate-400 uppercase ml-1">Lý do / Thành tích tiêu biểu</label>
-                        <textarea id="lyDo" rows="4" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-medium text-sm outline-none focus:border-blue-600 transition-all" placeholder="Ghi chú ngắn gọn các điểm mạnh nổi bật..."></textarea>
+                    <nav class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                        <button onclick="switchTab('nomination')" id="tab-nomination" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] uppercase font-black tracking-widest transition-all"><i data-lucide="user-check" size="14"></i>Đề cử</button>
+                        <button onclick="switchTab('voting')" id="tab-voting" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] uppercase font-black tracking-widest transition-all"><i data-lucide="check-circle-2" size="14"></i>Chấm điểm</button>
+                        <button onclick="switchTab('results')" id="tab-results" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] uppercase font-black tracking-widest transition-all"><i data-lucide="bar-chart-3" size="14"></i>Kết quả</button>
+                    </nav>
+                </div>
+            </header>
+
+            <main class="max-w-5xl mx-auto px-4 py-8">
+                <div id="adminPanel" class="hidden mb-10 space-y-6 animate-in slide-in-from-top-4">
+                    <div class="bg-slate-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden">
+                        <h2 class="text-xl font-black uppercase mb-6 flex items-center gap-3"><i data-lucide="shield-check" class="text-blue-400"></i> Bảng điều khiển Admin</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white/5 p-6 rounded-3xl border border-white/10">
+                            <div class="space-y-4">
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase">Giai đoạn 1: Đề cử</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="nomStart" class="bg-white/10 p-2 rounded-xl text-xs font-bold outline-none">
+                                    <input type="date" id="nomEnd" class="bg-white/10 p-2 rounded-xl text-xs font-bold outline-none">
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="text-[10px] font-black text-slate-400 uppercase">Giai đoạn 2: Chấm điểm</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" id="voteStart" class="bg-white/10 p-2 rounded-xl text-xs font-bold outline-none">
+                                    <input type="date" id="voteEnd" class="bg-white/10 p-2 rounded-xl text-xs font-bold outline-none">
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="saveSettings()" class="mt-4 w-full py-3 bg-blue-600 rounded-2xl font-black uppercase text-[10px] tracking-widest">Lưu cấu hình Timeline</button>
                     </div>
-                    <button onclick="saveVote()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 shadow-2xl hover:bg-black transition-all">
-                        <i data-lucide="send" class="w-4 h-4 text-[#ffcb05]"></i> Gửi đề cử chính thức
-                    </button>
                 </div>
 
-                <div id="adminArea" class="hidden mt-10 pt-8 border-t-2 border-dashed border-slate-200">
-                    <div class="flex items-center gap-2 mb-4 justify-center text-rose-600 font-black uppercase tracking-tighter italic">
-                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Bảng tổng hợp (Admin Only)
+                <div id="nominationSection" class="tab-content space-y-6">
                     </div>
-                    <div id="resultTable" class="text-[10px] overflow-x-auto rounded-2xl border border-slate-100 shadow-inner p-3 bg-slate-50 font-medium"></div>
-                </div>
-            </div>
-            
-            <p id="status" class="mt-8 text-center text-[10px] font-black uppercase text-slate-300 tracking-widest"></p>
+
+                <div id="votingSection" class="tab-content hidden space-y-6">
+                    </div>
+
+                <div id="resultsSection" class="tab-content hidden space-y-6">
+                    </div>
+            </main>
         </div>
     </div>
 
     <script>
-        // THÔNG SỐ DỰ ÁN UEBLTC CỦA VIỆT ANH
         const supabaseUrl = 'https://uebltcfcikgtxcgxdsbk.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVlYmx0Y2ZjaWtndHhjZ3hkc2JrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MjUwMjIsImV4cCI6MjA5MTAwMTAyMn0.rymHn3x9-nhem6_NM2ZP2WObe6XLV8G70BHvQnFbQUI';
-        const client = supabase.createClient(supabaseUrl, supabaseKey);
+        const sb = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Kích hoạt Icon
-        lucide.createIcons();
+        const DEPARTMENTS = [
+            { id: 'LOGISTICS', name: 'LOGISTICS', nominations: 2, tbp: 'Đỗ Ngọc Trường' },
+            { id: 'TRUCKING', name: 'TRUCKING', nominations: 2, tbp: 'Lê Văn Thảo' },
+            { id: 'CONSOL_XUAT_KA', name: 'CONSOL XUẤT & KEY ACCOUNT', nominations: 2, tbp: 'Phạm Thuỳ Linh' },
+            { id: 'HANG_NHAP', name: 'HÀNG NHẬP', nominations: 1, tbp: 'Phạm Thị Lan Hương' },
+            { id: 'CONSOL_NHAP', name: 'CONSOL NHẬP', nominations: 1, tbp: 'Trần Ngọc Trâm' },
+            { id: 'HANG_XUAT_FCL', name: 'HÀNG XUẤT FCL', nominations: 1, tbp: 'Nguyễn Thị Phương' },
+            { id: 'AIR_XUAT', name: 'AIR XUẤT', nominations: 1, tbp: 'Nguyễn Thị Quỳnh' },
+            { id: 'PROJECT', name: 'DỰ ÁN/RU', nominations: 1, tbp: 'Lê Minh Lai' },
+            { id: 'KE_TOAN', name: 'KẾ TOÁN', nominations: 1, tbp: 'Trần Thị Quyên' },
+            { id: 'VP_THANH_HOA', name: 'VP THANH HÓA/NGHỆ AN', nominations: 1, tbp: 'Lê Thị Thuý' },
+            { id: 'VP_HA_NAM', name: 'VP NAM ĐỊNH/HÀ NAM', nominations: 1, tbp: 'Nguyễn Thị Oanh' },
+            { id: 'KINH_DOANH', name: 'KINH DOANH', nominations: 0, tbp: 'Trần Văn Minh' },
+            { id: 'ADMIN', name: 'VẬN HÀNH - TESTING', nominations: 0, tbp: 'Bùi Việt Anh', isAdmin: true }
+        ];
 
-        async function sendOTP() {
-            const email = document.getElementById('emailInput').value;
-            if(!email.includes('@')) return alert("Cậu nhập thiếu @ rồi kìa!");
+        let currentUser = null;
+        let settings = {};
+
+        // Init
+        window.onload = async () => {
+            const select = document.getElementById('loginEmail');
+            DEPARTMENTS.forEach(d => select.innerHTML += `<option value="${d.tbp}">${d.tbp}</option>`);
+            lucide.createIcons();
+        };
+
+        async function handleLogin() {
+            const name = document.getElementById('loginEmail').value;
+            const otp = document.getElementById('loginOtp').value;
+            const quarter = document.getElementById('loginQuarter').value;
+
+            if (otp !== 'BEE2026') return alert("Mã sai!");
             
-            const { error } = await client.auth.signInWithOtp({ email });
-            if(error) {
-                alert("Lỗi kết nối: " + error.message);
-            } else {
-                document.getElementById('step1').classList.add('hidden');
-                document.getElementById('step2').classList.remove('hidden');
-                document.getElementById('status').innerText = "Đang chờ xác thực...";
-            }
-        }
+            currentUser = DEPARTMENTS.find(d => d.tbp === name);
+            currentUser.quarter = quarter;
 
-        async function verifyOTP() {
-            const email = document.getElementById('emailInput').value;
-            const token = document.getElementById('otpInput').value;
-            const { data, error } = await client.auth.verifyOtp({ email, token, type: 'magiclink' });
-            
-            if(error) {
-                alert("Mã OTP không đúng hoặc đã hết hạn!");
-            } else {
-                loginSuccess(data.user.email);
-            }
-        }
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('userName').innerText = currentUser.tbp;
 
-        function loginSuccess(email) {
-            document.getElementById('step2').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('displayUser').innerText = email;
+            if (currentUser.isAdmin) document.getElementById('adminPanel').classList.remove('hidden');
             
-            // Nếu là email của Việt Anh thì hiện Admin View
-            if(email.toLowerCase() === 'jihoon.vnhph@beelogistics.com') {
-                document.getElementById('adminArea').classList.remove('hidden');
-                loadAdminData();
-            }
-            loadNV();
+            await fetchSettings();
+            switchTab('nomination');
             lucide.createIcons();
         }
 
-        async function loadNV() {
-            const { data, error } = await client.from('danh_sach_nhan_vien').select('ho_ten');
-            if (!error && data) {
-                document.getElementById('listNV').innerHTML = data.map(n => `<option value="${n.ho_ten}">${n.ho_ten}</option>`).join('');
-            } else {
-                document.getElementById('listNV').innerHTML = '<option>Lỗi tải nhân viên</option>';
+        async function fetchSettings() {
+            const { data } = await sb.from('settings').select('*').eq('quy', currentUser.quarter).single();
+            if (data) {
+                settings = data.data;
+                document.getElementById('nomStart').value = settings.nomStart;
+                document.getElementById('nomEnd').value = settings.nomEnd;
+                document.getElementById('voteStart').value = settings.voteStart;
+                document.getElementById('voteEnd').value = settings.voteEnd;
             }
         }
 
-        async function saveVote() {
-            const status = document.getElementById('status');
-            status.innerText = "Đang gửi dữ liệu...";
+        async function saveSettings() {
+            const data = {
+                nomStart: document.getElementById('nomStart').value,
+                nomEnd: document.getElementById('nomEnd').value,
+                voteStart: document.getElementById('voteStart').value,
+                voteEnd: document.getElementById('voteEnd').value
+            };
+            await sb.from('settings').upsert({ quy: currentUser.quarter, data: data });
+            alert("Đã lưu Timeline!");
+            settings = data;
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active'));
             
-            const { error } = await client.from('danh_sach_de_cu').insert([{
-                nguoi_de_cu_email: document.getElementById('displayUser').innerText,
-                nguoi_duoc_de_cu: document.getElementById('listNV').value,
-                ly_do: document.getElementById('lyDo').value,
-                quy: document.getElementById('quy').value
-            }]);
+            document.getElementById(`${tab}Section`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('tab-active');
 
-            if(!error) { 
-                alert("Đã gửi đề cử thành công!"); 
-                location.reload(); 
-            } else {
-                alert("Lỗi khi gửi đề cử, cậu kiểm tra lại bảng danh_sach_de_cu nhé!");
-            }
+            if (tab === 'nomination') renderNomination();
+            if (tab === 'voting') renderVoting();
+            if (tab === 'results') renderResults();
+            lucide.createIcons();
         }
 
-        async function loadAdminData() {
-            const { data } = await client.from('danh_sach_de_cu').select('*');
-            let h = '<table class="w-full text-left border-collapse"><thead><tr class="bg-slate-200 border-b text-[8px]"> <th class="p-2">Người nhận</th><th class="p-2">Lý do đề cử</th> </tr></thead><tbody>';
-            if(data && data.length > 0) {
-                data.forEach(d => {
-                    h += `<tr class="border-b"><td class="p-2 font-black">${d.nguoi_duoc_de_cu}</td><td class="p-2">${d.ly_do}</td></tr>`;
-                });
-            } else {
-                h += '<tr><td colspan="2" class="p-4 text-center text-slate-400 italic">Chưa có dữ liệu đề cử nào.</td></tr>';
+        async function renderNomination() {
+            const container = document.getElementById('nominationSection');
+            const dept = DEPARTMENTS.find(d => d.id === currentUser.id);
+            
+            if (currentUser.isAdmin || !dept || dept.nominations === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-black uppercase text-[10px] tracking-widest italic">Cần bình chọn (Không đề cử)</div>`;
+                return;
             }
-            document.getElementById('resultTable').innerHTML = h + '</tbody></table>';
+
+            const { data: existing } = await sb.from('danh_sach_de_cu').select('*').eq('dept_id', currentUser.id).eq('quy', currentUser.quarter).single();
+            const staff = existing?.staff || Array(dept.nominations).fill({ name: '', pos: '', reason: '' });
+
+            let html = `<div class="max-w-2xl mx-auto space-y-6">
+                <div class="bg-white p-10 rounded-[40px] border border-slate-200 shadow-sm">
+                    <h2 class="text-2xl font-black uppercase tracking-tighter mb-8 italic">Đề cử ${currentUser.quarter}</h2>`;
+            
+            staff.forEach((s, i) => {
+                html += `<div class="p-6 bg-slate-50 rounded-3xl border-2 border-white shadow-inner mb-6 space-y-3">
+                    <input type="text" id="name-${i}" placeholder="HỌ TÊN NHÂN VIÊN" value="${s.name}" class="w-full p-3 rounded-xl border border-slate-100 font-black uppercase outline-none focus:ring-2 focus:ring-blue-500">
+                    <textarea id="reason-${i}" placeholder="Lý do đề cử..." class="w-full p-3 rounded-xl border border-slate-100 font-medium text-xs outline-none">${s.reason || ''}</textarea>
+                </div>`;
+            });
+
+            html += `<button onclick="submitNomination(${dept.nominations})" class="w-full py-5 bg-blue-600 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl">Gửi đề cử chính thức</button>
+                </div></div>`;
+            container.innerHTML = html;
+        }
+
+        async function submitNomination(count) {
+            const staff = [];
+            for(let i=0; i<count; i++) {
+                staff.push({ name: document.getElementById(`name-${i}`).value, reason: document.getElementById(`reason-${i}`).value });
+            }
+            await sb.from('danh_sach_de_cu').upsert({ 
+                dept_id: currentUser.id, 
+                dept_name: currentUser.name, 
+                staff, 
+                quy: currentUser.quarter,
+                submitted_by: currentUser.tbp 
+            }, { onConflict: 'dept_id, quy' });
+            alert("Đã ghi nhận đề cử!");
+        }
+
+        async function renderVoting() {
+            const container = document.getElementById('votingSection');
+            const { data: allNoms } = await sb.from('danh_sach_de_cu').select('*').eq('quy', currentUser.quarter);
+            const filtered = allNoms.filter(n => n.dept_id !== currentUser.id);
+            
+            const nominees = filtered.flatMap(n => n.staff.map(s => ({...s, dept: n.dept_name})));
+            const maxScore = nominees.length;
+
+            let html = `<div class="max-w-3xl mx-auto bg-white p-10 rounded-[40px] border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-10"><h2 class="text-2xl font-black uppercase tracking-tighter italic">Bình chọn kín</h2><div class="bg-blue-600 text-white px-5 py-2 rounded-2xl text-[11px] font-black uppercase">Thang điểm: 1 → ${maxScore}</div></div>
+                <div class="space-y-3">`;
+            
+            nominees.forEach((n, i) => {
+                html += `<div class="p-5 bg-slate-50 rounded-3xl flex items-center justify-between border-2 border-transparent">
+                    <div><h4 class="font-black text-slate-800 uppercase tracking-tight">${n.name}</h4><p class="text-[9px] text-slate-400 font-black uppercase">${n.dept}</p></div>
+                    <select id="vote-${i}" class="w-20 p-3 bg-white rounded-2xl border-2 border-slate-100 font-black text-blue-600 text-center">
+                        <option value="">--</option>
+                        ${Array.from({length: maxScore}).map((_, idx) => `<option value="${idx+1}">${idx+1}</option>`).join('')}
+                    </select>
+                </div>`;
+            });
+
+            html += `<button onclick="submitVotes(${nominees.length})" class="w-full py-5 bg-blue-600 text-white rounded-[24px] font-black uppercase tracking-widest shadow-xl mt-6">Xác nhận kết quả</button></div></div>`;
+            container.innerHTML = html;
+        }
+
+        async function submitVotes(count) {
+            const scores = {};
+            const vals = [];
+            for(let i=0; i<count; i++) {
+                const val = document.getElementById(`vote-${i}`).value;
+                const name = document.querySelectorAll('.tracking-tight')[i].innerText;
+                if(!val) return alert("Vui lòng chấm điểm đầy đủ!");
+                scores[name] = parseInt(val);
+                vals.push(val);
+            }
+            if(new Set(vals).size !== vals.length) return alert("Điểm số không được trùng nhau!");
+            
+            await sb.from('danh_sach_binh_chon').upsert({ voter_email: currentUser.tbp, scores, quy: currentUser.quarter });
+            alert("Cảm ơn cậu đã bình chọn!");
+        }
+
+        async function renderResults() {
+            const container = document.getElementById('resultsSection');
+            const { data: votes } = await sb.from('danh_sach_binh_chon').select('*').eq('quy', currentUser.quarter);
+            const { data: noms } = await sb.from('danh_sach_de_cu').select('*').eq('quy', currentUser.quarter);
+            
+            const scoresMap = {};
+            noms.forEach(n => n.staff.forEach(s => scoresMap[s.name] = { name: s.name, dept: n.dept_name, total: 0, count: 0 }));
+            
+            votes.forEach(v => {
+                Object.entries(v.scores).forEach(([name, score]) => {
+                    if(scoresMap[name]) { scoresMap[name].total += score; scoresMap[name].count += 1; }
+                });
+            });
+
+            const results = Object.values(scoresMap).map(s => ({...s, avg: s.count > 0 ? (s.total/s.count).toFixed(2) : 0})).sort((a,b) => b.avg - a.avg);
+
+            let html = `<div class="text-center mb-10"><h2 class="text-4xl font-black text-slate-900 tracking-tighter uppercase mb-2 italic underline decoration-blue-500">Bảng vinh danh NVXS</h2></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end max-w-4xl mx-auto mb-10">`;
+            
+            results.slice(0, 3).forEach((s, i) => {
+                html += `<div class="relative p-10 rounded-[50px] border-4 flex flex-col items-center text-center ${i === 0 ? 'bg-amber-50 border-amber-400 scale-105 shadow-2xl z-10' : 'bg-white border-slate-100 shadow-xl opacity-90'}">
+                    <div class="absolute top-6 right-6 px-3 py-1 text-white rounded-full text-[10px] font-black uppercase ${i === 0 ? 'bg-amber-400' : 'bg-slate-900'}">TOP ${i+1}</div>
+                    <h3 class="text-2xl font-black text-slate-800 mb-1 uppercase tracking-tighter italic">${s.name}</h3>
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-6">${s.dept}</p>
+                    <div class="text-5xl text-blue-600 font-black tracking-tighter">${s.avg}</div>
+                </div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+            lucide.createIcons();
         }
     </script>
 </body>
